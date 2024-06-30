@@ -21,4 +21,17 @@ public class SemanticVersion {
     public SemanticVersion(int major) {
         this(major, 0, 0);
     }
+    // endregion
+    
+    // region | Getters
+    public int major() {
+        return major;
+    }
+    public int minor() {
+        return minor;
+    }
+    public int patch() {
+        return patch;
+    }
+    // endregion
 }
