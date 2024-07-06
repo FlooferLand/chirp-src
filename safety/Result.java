@@ -52,8 +52,10 @@ public final class Result<TOk, TErr> {
     }
 
     public TOk unwrap() {
-        assert(value != null);
-        return value;
+        if (hasValue())
+            return value;
+        else
+            throw new RuntimeException(String.valueOf(error));
     }
     
     public TOk unwrapOr(TOk _default) {
