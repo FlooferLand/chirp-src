@@ -19,7 +19,6 @@ public final class Option<T> {
     private final boolean hasValue;
     private final @Nullable T value;
     
-    // region | Constructors
     private Option(@Nullable T value) {
         this.value = value;
         this.hasValue = value != null;
@@ -28,13 +27,23 @@ public final class Option<T> {
         this.value = null;
         this.hasValue = false;
     }
+    
+    // region | Constructors
+    /** Stores a value; stores nothing is the value is <c>null</c> */
     public static <T> Option<T> some(@Nullable T value) {
         return (value == null)
                 ? new Option<>()
                 : new Option<>(value);
     }
+    
+    /** Stores nothing */
     public static <T> Option<T> none() {
         return new Option<>();
+    }
+
+    /** Stores a value if the condition is true, otherwise it stores nothing */
+    public static <T> Option<T> conditional(boolean condition, T onTrue) {
+        return condition ? some(onTrue) : none();
     }
     // endregion
     
