@@ -1,6 +1,6 @@
 package flooferland.chirp.safety;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public final class Option<T> {
     private final boolean hasValue;

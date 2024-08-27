@@ -1,6 +1,6 @@
 package flooferland.chirp.safety;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public final class Result<TOk, TErr> {
     private final boolean hasValue;
