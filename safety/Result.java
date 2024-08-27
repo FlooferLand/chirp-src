@@ -1,5 +1,6 @@
 package flooferland.chirp.safety;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class Result<TOk, TErr> {
@@ -17,11 +18,23 @@ public final class Result<TOk, TErr> {
         this.error = error;
         this.hasValue = value != null;
     }
-    public static <TOk, TErr> Result<TOk, TErr> ok(@Nullable TOk value) {
+    
+    // region | Constructors
+    /** Stores a value; stores nothing is the value is <c>null</c> */
+    public static <TOk, TErr> Result<TOk, TErr> ok(@NotNull TOk value) {
         return new Result<>(value, null);
     }
-    public static <TOk, TErr> Result<TOk, TErr> err(@Nullable TErr error) {
+    
+    public static <TOk, TErr> Result<TOk, TErr> err(@NotNull TErr error) {
         return new Result<>(null, error);
+    }
+    public static <TOk> Result<TOk, String> err(@NotNull String formatErr, Object ... args) {
+        return new Result<>(null, String.format(formatErr, args));
+    }
+
+    /** Stores a value if the condition is true, otherwise it stores an error */
+    public static <TOk, TErr> Result<TOk, TErr> conditional(boolean condition, @NotNull TOk value, @NotNull TErr error) {
+        return condition ? ok(value) : err(error);
     }
     // endregion
     
@@ -29,13 +42,22 @@ public final class Result<TOk, TErr> {
     public @Nullable TOk letOk() {
         return this.value;
     }
-    
-    public interface IMapSome<TOk, TErr> { Result<TOk, TErr> mapper(TOk value); }
-    public Result<TOk, TErr> mapOk(IMapSome<TOk, TErr> map) {
+    public @Nullable TErr letErr() {
+        return this.error;
+    }
+
+    public TOk unwrap() {
         if (hasValue())
-            return map.mapper(value);
+            return value;
         else
-            return err(error);
+            throw new RuntimeException(String.valueOf(error));
+    }
+    
+    public TOk unwrapOr(TOk _default) {
+        if (value != null)
+            return value;
+        else
+            return _default;
     }
     
     public TOk expect(String message) {
@@ -44,17 +66,25 @@ public final class Result<TOk, TErr> {
         else
             throw new RuntimeException(message);
     }
+    // endregion
 
-    public TOk unwrap() {
-        assert(value != null);
-        return value;
+    // region | Value mapping
+    public interface IMapSome<TInput, TOutput> { TOutput mapper(TInput value); }
+
+    /** If there is a value, it'll map the value through this function */
+    public <TOutputOk> Result<TOutputOk, TErr> mapOk(IMapSome<TOk, TOutputOk> map) {
+        if (hasValue())
+            return Result.ok(map.mapper(value));
+        else
+            return err(error);
     }
     
-    public TOk unwrapOr(TOk _default) {
-        if (value != null)
-            return value;
+    /** If there is an error, it'll map the error through this function */
+    public <TOutputErr> Result<TOk, TOutputErr> mapErr(IMapSome<TErr, TOutputErr> map) {
+        if (hasValue())
+            return Result.ok(value);
         else
-            return _default;
+            return err(map.mapper(error));
     }
     // endregion
 }
